@@ -206,7 +206,7 @@ public class Menu{
                     myPage--;
                 }else if(option.equals("S")&&myPage!=nPages){
                     myPage++;
-                }else if(Integer.parseInt(option)>=0&&Integer.parseInt(option)<=tmp.size()){
+                }else if(Integer.parseInt(option)>=0&&Integer.parseInt(option)<=tmp.size()&&!option.equals("00")){
                     checked=true;
                 }
             }catch(Exception e){
@@ -241,10 +241,12 @@ public class Menu{
         } 
     }
     
-    /**Metodo que representa el primer puntO del menu en el cual se busca un 
+    /**Metodo que representa el primer punto del menu en el cual se busca un 
     *vuelo por aeropuerto origen o destino, posteriormente se elige y una vez 
     *elegido el vuelo se imprimen los asientos disponibles para ese vuelo. Una 
-    *vez elegido bilete se llama al metodo de esta clase finalPurchase().
+    *vez elegido bilete se llama al metodo de esta clase finalPurchase()
+    *Como se puede observar cada operacion tiene un punto de guardado haciendo 
+    *de simil de una transacción.
     */
     private static void searchFlight(){
         String OriginAirport=null;
