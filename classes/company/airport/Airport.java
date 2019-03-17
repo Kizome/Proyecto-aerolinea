@@ -24,6 +24,7 @@ public class Airport{
     }
     /**
     * Metodo que añade servicios al aeropuerto
+    * @param s Recibe el servicio a añadir
     */
     public void addSevices(String s){
         this.services.add(s);
@@ -31,7 +32,8 @@ public class Airport{
 
     @Override
     public String toString(){
-        return "Aeropuerto "+this.acronym+" "+this.name+"-Ciudad"+this.city+"-pais"+this.country;
+        return "Siglas: "+this.acronym+"\n"+"         - Nombre del Aeropuerto: "+this.name+"\n"+"         - Ciudad: "+this.city+"\n"+"         - Pais: "+this.country+
+        "\n         -----------------------------";
     }
 
 

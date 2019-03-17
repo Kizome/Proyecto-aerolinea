@@ -71,6 +71,7 @@ abstract public class People{
     * Metodo que comprueba la validez de un DNI
     * @param dni Recibe un dni de 9 caracteres
     * @return Devuelve un booleano de verdadero o falso
+    * @throws Exception Lanza una excepcion en caso de error inesperado
     */
     public static boolean checkDni(String dni)throws Exception{
 		boolean set=false;

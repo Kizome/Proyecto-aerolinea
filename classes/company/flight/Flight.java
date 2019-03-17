@@ -79,6 +79,10 @@ public class Flight{
     * Arraylist de arraylist donde se guardarán todos los asientos de vuelo.
     */
     public ArrayList<ArrayList<Seat>> seatsFlight= new ArrayList<ArrayList<Seat>>();
+    /**
+    * ArrayList de Aeropuertos en los que el avion hace escala.
+    */
+    public ArrayList<Airport> scales=new ArrayList<>();
 
     /**
     * Constructor con 7 parametros para instanciar un vuelo
@@ -107,6 +111,12 @@ public class Flight{
         this.generateTripulation(pla);
         generateArrive(cal);
         p.actualflight=this;
+    }
+
+    public Flight(Airport dest, Airport ori, Plane pla,
+    Pilot p, int price, int dura, Calendar cal,ArrayList<Airport> sca)throws Exception{
+        this(dest,ori,pla,p,price,dura,cal);
+        this.scales=sca;
     }
 
     /**
@@ -424,6 +434,14 @@ public class Flight{
       inf.append(" a las ");
       inf.append(myCalendar.timeFormat(this.flightDate)+"\n");
       inf.append("     Fecha y hora de llegada: "+this.flightArrived+"\n");
+      if (this.scales==null||this.scales.size()==0) {
+        inf.append("     Sin escalas.\n");
+      }else{
+        inf.append("     Con escala en: \n");
+        for (int i=0;i<this.scales.size();i++) {
+          inf.append("         - "+this.scales.get(i)+"\n");
+        }
+      }
       return inf.toString();
     }
 
