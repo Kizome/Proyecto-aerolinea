@@ -29,7 +29,7 @@ public class Ticket{
 	*/
 	public String id;
 	/**
-	* Atributo que guarda la fecha del cliente asociado al ticket
+	* Atributo que guarda la fecha de salida del vuelo asociado al ticket
 	*/
 	private Calendar date;
 	/**

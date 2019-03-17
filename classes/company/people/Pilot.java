@@ -2,28 +2,39 @@ package classes.company.people;
 
 import java.util.Calendar;
 
+/**Clase Pilot la cual extiende de Employee. Esta clase cuenta con un atributo
+*propio "flyingHour".
+*@author Rafa Amo Moral
+*/
+
 public class Pilot extends Employee{
 
-    private int flyingHour=0;
-    public static final int SALARY_DEF=100000;
-    public static final int SALARYSINCREMENT=5000;
+    private int flyingHour;
+    public static final int SALARY_DEF;
+    public static final int SALARYSINCREMENT;
 
-    /** Genera un piloto, cogiendo atributos comunes de la clase employee,
-    * y añadiendo
-    */
+    static{
+        SALARY_DEF=100000;
+        SALARYSINCREMENT=5000;
+    }
+
     public Pilot(String name, String surname, String dni, Calendar b, String nationality, String lang, int nflights, int fly)throws Exception{
         super(name, surname, dni, b, nationality, lang, nflights,SALARY_DEF);
         this.flyingHour=fly;
     }
 
-    /**Añade las horas del ultimo vuelo realizado a las horas totales del piloto
+    /**Metodo que añade horas de vuelo al pioto, le añade un vuelo, porque en
+    *el contexto del proble si le añado horas es porque participa en un vuelo
+    *y llamo a el metodo de esta clase slarysIncrement()
+    *@param hours int con el numero de horas del piloto
     */
     public void addHours(int hours){
         this.flyingHour=this.flyingHour+hours;
         this.numberOfFlight++;
         this.salarysIncrement();
     }
-    /**incrementa el salario del piloto por cada vuelo
+    /**
+    * Metodo que incrementa el salario del piloto en funcion de los vuelos realizados
     */
     public void salarysIncrement(){
         this.salary=this.salary+Pilot.SALARYSINCREMENT;

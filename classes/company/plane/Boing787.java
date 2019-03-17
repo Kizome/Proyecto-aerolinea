@@ -1,13 +1,13 @@
 package classes.company.plane;
 
-/**
-*@Author: Rafa Amo.
-*/
 import java.util.ArrayList;
 import java.util.Calendar;
 
 import classes.company.seat.Seat;
 
+/**Clase Boing 787 la cual hereda de Plane y desarrolla un metodo abstracto.
+*@author Rafa Amo.
+*/
 
 public class Boing787 extends Plane{
     /**
@@ -25,7 +25,7 @@ public class Boing787 extends Plane{
     /**
     * Atributo constante que guarda el precio en litros por kilometros, del combustible
     */
-    private final static int OILCONSUME=12;//l/km
+    private final static int OILCONSUME=160;//l/km
     /**
     * Atributo constante que guarda la filas de asientos
     */

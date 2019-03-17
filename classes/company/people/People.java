@@ -3,7 +3,7 @@ package classes.company.people;
 
 import java.util.Calendar;
 /**
-*@author: Jesus Torralbo
+*@author Jesus Torralbo
 */
 
 abstract public class People{
@@ -13,10 +13,9 @@ abstract public class People{
 	protected String dni;
 	protected Calendar birthday;
 	protected String nationality;
-    
-    
-    /** Recibe un nombre, apellido, dni, fecha_Nac y nacionalidad
-    */
+
+
+
     protected People(String name, String surname, String dni, Calendar birthday, String nationality)throws Exception{
         this.name=name;
         this.surname=surname;
@@ -24,8 +23,11 @@ abstract public class People{
         this.birthday=birthday;
         this.nationality=nationality;
     }
-    
+
     /**Comprueba si el dni es valido
+    @param dni String con el dni a comprobar
+    @return String con el DNI
+    @throws Exception Lanza una excepcion si el dni no es valido
     */
     private static String setDni(String dni)throws Exception{
         if(People.checkDni(dni)==true){
@@ -34,9 +36,7 @@ abstract public class People{
             throw new Exception("DNI no valido");
         }
     }
-    
-    
-    
+
     //GETTER
 	public String getName(){
 		return this.name;
@@ -66,20 +66,24 @@ abstract public class People{
 	public void setBirthday(Calendar b){
 		this.birthday=b;
 	}
-    
-    
+
+    /**
+    * Metodo que comprueba la validez de un DNI
+    * @param dni Recibe un dni de 9 caracteres
+    * @return Devuelve un booleano de verdadero o falso
+    */
     public static boolean checkDni(String dni)throws Exception{
 		boolean set=false;
-        
+
 		if (dni.length()==9){
 			if(Character.isDigit(dni.charAt(0))&&Character.isDigit(dni.charAt(1))
                &&Character.isDigit(dni.charAt(2))&&Character.isDigit(dni.charAt(3))
                &&Character.isDigit(dni.charAt(4))&&Character.isDigit(dni.charAt(5))
                &&Character.isDigit(dni.charAt(6))&&Character.isDigit(dni.charAt(7))
                &&Character.isLetter(dni.charAt(8))){
-                
+
                     String miWord=""+dni.charAt(8);
-                
+
 			if(miWord.toUpperCase().equals(People.dniWord(dni.substring(0,8)))){
 				set=true;
 			}
@@ -91,28 +95,33 @@ abstract public class People{
         }
 		return set;
 	}
-    
+
+    /**
+    * Metodo para la comprobacion de que la letra del dni corresponde al numero
+    * @param dni Recibe el dni introducido
+    * @return Devuelve la eltra correspondiente al numero recibido
+    */
     private static String dniWord(String dni){
 		int myDNI = Integer.parseInt(dni.substring(0,8));
         int rest = 0;
         String miWord = "";
         String[] availablesWord = {"T", "R", "W", "A", "G", "M", "Y", "F", "P", "D", "X", "B", "N", "J", "Z", "S", "Q", "V", "H", "L", "C", "K", "E"};
- 
+
         rest = myDNI % 23;
- 
+
         miWord = availablesWord[rest];
- 
+
         return miWord;
 	}
-    
+
 
 	@Override
     public String toString(){
     	return this.name+" "+this.surname+" con DNI "+this.dni;
     }
-    
-    
-    
-    
-    
+
+
+
+
+
 }

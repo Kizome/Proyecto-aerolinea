@@ -1,17 +1,18 @@
 package classes.company.plane;
 
-/**
-*@author Rafa Amo.
-*/
 import java.util.ArrayList;
 import java.util.Calendar;
 
 import classes.company.seat.Seat;
 
+/**Clase AirBusA320 la cual hereda de Plane y desarrolla un metodo abstracto.
+*@author Rafa Amo Moral.
+*/
+
 public class AirBusA320 extends Plane{
-  /**
-  * Atributo constante que guarda el precio del avion
-  */
+    /**
+    * Atributo constante que guarda el precio del avion
+    */
     private final static int COST=80000000;
     /**
     * Atributo constante que guarda la autonomia del avion
@@ -24,7 +25,7 @@ public class AirBusA320 extends Plane{
     /**
     * Atributo constante que guarda el precio en litros por kilometros, del combustible
     */
-    private final static int OILCONSUME=11;//l/km
+    private final static int OILCONSUME=140;//l/km
     /**
     * Atributo constante que guarda la filas de asientos
     */

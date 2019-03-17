@@ -1,6 +1,7 @@
 package classes.company.flight;
 import interfaces.IAirCompany;
 import classes.company.airport.Airport;
+import classes.myCalendar;
 import classes.company.Company;
 import classes.company.seat.Seat;
 import classes.company.plane.Plane;
@@ -16,7 +17,7 @@ import java.time.format.*;
 import java.time.*;
 import static java.util.Comparator.*;
 /**
-*@author: Omar Jesús Muñoz Cuenca
+*@author Omar Jesús Muñoz Cuenca
 */
 
 public class Flight{
@@ -48,7 +49,7 @@ public class Flight{
     /**
     * Almacena, dependiento de la salida del vuelo, la llegada del mismo
     */
-    public Calendar flightArrived= Calendar.getInstance();
+    public String flightArrived;
     /**
     * Array adimensional para guardar la tripulación de cada avión.
     */
@@ -69,10 +70,6 @@ public class Flight{
     * Almacena el precio del asiento básico.
     */
     public int priceSeat;
-    /**
-    * Atributo para almacenar la hora.
-    */
-    //public StringBuilder hour=new StringBuilder();
     /**
     * Variable que guarda la ide del vuelo, generada con el acronimo de la compañia, la hora de salida y el acronimo del
     * aeropuerto de destino.
@@ -96,6 +93,7 @@ public class Flight{
     */
     public Flight(Airport dest, Airport ori, Plane pla,
     Pilot p, int price, int dura, Calendar cal)throws Exception{
+        this.priceSeat=price;
         pla.setFlight(this);
         this.destinationAirport=dest;
         this.originAirport=ori;
@@ -108,6 +106,7 @@ public class Flight{
         this.addPilot(p);
         this.generateTripulation(pla);
         generateArrive(cal);
+        p.actualflight=this;
     }
 
     /**
@@ -138,8 +137,14 @@ public class Flight{
     * @param ca Recibe la fecha de salida del vuelo y lo almacena en otra variable
     */
     public void generateArrive(Calendar ca){
-      this.flightArrived=ca;
-      this.flightArrived.add(Calendar.MINUTE, this.durationFlight);
+      StringBuilder arrive=new StringBuilder();
+      int duration= this.durationFlight-(this.durationFlight*2);
+      this.flightDate.add(Calendar.MINUTE, this.durationFlight);
+      arrive.append(myCalendar.format(this.flightDate));
+      arrive.append(" a las ");
+      arrive.append(myCalendar.timeFormat(this.flightDate));
+      this.flightDate.add(Calendar.MINUTE, duration);
+      this.flightArrived= arrive.toString();
     }
 
     /**
@@ -162,15 +167,25 @@ public class Flight{
     */
     public void addSeat(Seat a){
       boolean added=false;
-      for(int i=1 ;i<(this.seatsFlight.size())+1&&!added;i++ ) {
+      for(int i=0 ;i<(this.seatsFlight.size())&&!added;i++ ) {
           for (int z=0;z<this.seatsFlight.get(i).size()&&!added;z++ ) {
               if(this.seatsFlight.get(i).get(z)==a) {
-
                   this.seatsFlight.get(i).get(z).available=true;
                   added=true;
 
 
               }
+          }
+
+      }
+    }
+
+    /**Restablece la disponibilidad de los asientos del vuelo.
+    */
+    public void resetSeat(){
+        for(int i=0 ;i<this.seatsFlight.size();i++ ) {
+          for (int z=0;z<this.seatsFlight.get(i).size();z++ ) {
+              this.seatsFlight.get(i).get(z).available=true;
           }
 
       }
@@ -379,13 +394,47 @@ public class Flight{
       return newname.toString();
     }
 
+    public ArrayList<Employee> flightsEmployee(){
+        ArrayList<Employee> employees=new ArrayList<>();
+
+        for(int i=0;i<this.myPilot.length;i++){
+            if(this.myPilot[i]!=null){
+                employees.add(myPilot[i]);
+            }
+        }
+
+        for(int i=0;i<this.myTripulation.length;i++){
+            if(this.myTripulation[i]!=null){
+                employees.add(myTripulation[i]);
+            }
+        }
+        return employees;
+    }
+
+    /**
+    * Metodo encargado de devolver un string con toda la información del vuelo actual.
+    * @return Devuelve un stringbuilder convertido a String con la informacion del vuelo formateada.
+    */
+    public String flightInformation(){
+      StringBuilder inf= new StringBuilder();
+      inf.append("Vuelo con salida desde "+this.originAirport.name+", con destino "+this.destinationAirport.name+"\n");
+      inf.append("     ID del vuelo: "+this.id+"\n");
+      inf.append("     Duracion del vuelo: "+this.durationFlight+" minutos.\n");
+      inf.append("     Fecha y hora de salida: "+myCalendar.format(this.flightDate));
+      inf.append(" a las ");
+      inf.append(myCalendar.timeFormat(this.flightDate)+"\n");
+      inf.append("     Fecha y hora de llegada: "+this.flightArrived+"\n");
+      return inf.toString();
+    }
+
+
     /**
     * Sobrescritura del método toString
     * @return devuelve una frase con el aeropuerto origen y destino
     */
     @Override
     public String toString(){
-      return "Vuelo con salida desde "+this.originAirport.name+", con destino "+this.destinationAirport.name;
+      return this.id;
     }
 
 }

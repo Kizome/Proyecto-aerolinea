@@ -1,6 +1,6 @@
 package classes.company;
 
-//Importaciones de interface y clases de las que dependemos
+//Importaciones de interface y clases del programa
 import interfaces.IAirCompany;
 import classes.company.airport.Airport;
 import classes.company.plane.Plane;
@@ -13,7 +13,6 @@ import classes.company.ticket.Ticket;
 import classes.company.seat.Seat;
 import classes.myCalendar;
 
-
 //Importacion de utilidades
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -21,16 +20,20 @@ import java.util.GregorianCalendar;
 import java.util.Collections;
 import java.util.Comparator;
 
-public class Company implements IAirCompany{
+/**Clase desde la que se controla la gestion de vuelos, clientes, Empleados
+Aviones y Billetes entre otras cosas.
+@author Rafa Amo Moral
+*/
 
+public class Company implements IAirCompany{
 
     //Propiedad flag singleton
     private static Company myCompany;
 
     //Constantes
-    public final static String NAME="Iberia";
-    public final static String ACRONYM="IBE";
-    public final static GregorianCalendar fundationDate=new GregorianCalendar(1998,8,19);
+    public final static String NAME;
+    public final static String ACRONYM;
+    public final static GregorianCalendar fundationDate;
 
     //Propiedades de la clase
     public static String ourCeo;
@@ -40,10 +43,11 @@ public class Company implements IAirCompany{
     public static ArrayList<Client> ourClients;
     public static ArrayList<Ticket> ourTickets;
 
-
-
     //Bloque static para inicializar propiedades static
     static{
+        NAME="Ibeia";
+        ACRONYM="IBE";
+        fundationDate=new GregorianCalendar(1998,8,19);
         ourCeo="Carlos Serrano";
         ourEmployees=new ArrayList<>();
         ourPlanes= new ArrayList<>();
@@ -60,6 +64,7 @@ public class Company implements IAirCompany{
     /**Metodo static constructor de la clase si previamente no ha sido
     *construida, de modo que o bien instanciamos la clase(Primera llamada del
     metodo), o bien obtenemos de resultado la primera instancia.
+    *@return Objeto Singletone Company
     */
     public static Company getInstance() {
         if (myCompany == null) {
@@ -68,48 +73,47 @@ public class Company implements IAirCompany{
         return myCompany;
     }
 
-
-
-
-    /*TESTEO
-    */
-    public String listTickets(){
-        //Collections.sort(this.ourTickets,new Comparator());
-        StringBuilder myString=new StringBuilder();
-
-        for(int i=0;i<this.ourTickets.size();i++){
-            myString.append(this.ourTickets.get(i));//EL PRECIO
-        }
-        return myString.toString();
-    }
-
-
-
-
-    /**Metodo que comprueba si alguno de los vuelos en el ArrayList<Flight> de
+    /**Metodo que comprueba si alguno de los vuelos en el ArrayList de Flight de
     *esta clase es igual o mayor a la hora simulada actual, de ser así, llama
     *a el metodo coprobeTickets ,posteriormente elimina el vuelo y usa recursividad.
+    *@param simulatedDate con la hora actual simulada
+    *@throws Exception Lanzamiento de una excepcion en caso de error imprevisto
     */
-    public void comprobeFlights(Calendar simulatedDate){
-        Calendar mc=Calendar.getInstance();
-        mc.set(simulatedDate.get(Calendar.YEAR),simulatedDate.get(Calendar.MONTH),(simulatedDate.get(Calendar.DAY_OF_MONTH)-1));
+    public void comprobeFlights(Calendar simulatedDate)throws Exception{
+        Calendar mc=new GregorianCalendar(simulatedDate.get(Calendar.YEAR),simulatedDate.get(Calendar.MONTH),(simulatedDate.get(Calendar.DAY_OF_MONTH)));
+
 
         for(int i=0;i<this.ourFlights.size();i++){
             if(this.ourFlights.get(i).flightDate.before(mc)){
+                Flight tmp=this.ourFlights.get(i);
+                tmp.resetSeat();
+                this.unsignEmployees(this.ourFlights.get(i));
                 this.comprobeTickets(this.ourFlights.get(i));
-                this.ourFlights.remove(i);
-                this.comprobeFlights(simulatedDate);
+                this.removeFlight(this.ourFlights.get(i));
+
+                try{
+                    tmp.flightDate.add(Calendar.HOUR_OF_DAY,168);
+                    Flight mf=new Flight(tmp.destinationAirport,tmp.originAirport,
+                                     tmp.myPlane,tmp.myPilot[0],tmp.priceSeat,
+                                     tmp.durationFlight,tmp.flightDate);
+                    this.addFlight(mf);
+                }catch(Exception e){
+                    throw e;
+                }
+                this.comprobeFlights(mc);
             }
         }
     }
 
     /**Metodo apoyo del metodo comprobeFlights, su funcion consiste en buscar
-    *en el ArrayList<Ticket> de esta clase los tickets cuyo vuelo sea el pasado
+    *en el ArrayList de Ticket de esta clase los tickets cuyo vuelo sea el pasado
     *por referencia en esta funcion. Si hay match elimina el ticket y ademas usa
     *recursividad para no alterar la relacion i-size(). Si no hay match,
     *llama al metodo comprobesClientsTicket.
+    *@param f Obeto tipo Flight a comprobar
+    *@throws Exception Lanzamiento de una excepción en caso de error imprevisto
     */
-    public void comprobeTickets(Flight f){
+    public void comprobeTickets(Flight f)throws Exception{
         for(int i=0;i<this.ourTickets.size();i++){
             if(this.ourTickets.get(i).getFlight()==f){
                 this.ourTickets.remove(this.ourTickets.get(i));
@@ -121,8 +125,9 @@ public class Company implements IAirCompany{
     }
 
     /**Metodo apoyo del metodo comprobeTickets el cual busca en el ArrayList
-    *<Client> de esta clase y llama al metodo haveTicketOfThisFlight de cada
-    posicion.
+    *de Client de esta clase y llama al metodo haveTicketOfThisFlight de cada
+    *posicion.
+    *@param f Objeto tipo Flight a comprobar
     */
     public void comprobesClientsTicket(Flight f){
         for(int i=0;i<this.ourClients.size();i++){
@@ -130,19 +135,20 @@ public class Company implements IAirCompany{
         }
     }
 
-
-
-
-    //Inserta el empleado al ArrayList si no se encuentra previamente
+    /**Inserta el empleado al ArrayList si no se encuentra previamente
+    @param e Objeto tipo Employee a insertar
+    */
     public void hireEmployee(Employee e)throws Exception{
-        if(this.searchEmployee(e)==false){
-           this.ourEmployees.add(e);
-        }else{
+        if(e!=null){
+            if(this.searchEmployee(e)==false){
+                this.ourEmployees.add(e);
+            }else{
             throw new Exception("Ya existe ese empleado");
+            }
         }
     }
 
-    /**Metodo que busca en el ArrayList<Employee> y elimina el empleado pasado
+    /**Metodo que busca en el ArrayList de Employee y elimina el empleado pasado
     *por referencia, sino lo encuentra lanza una excepcion.
     @param e: Empleado a eliminar.
     */
@@ -150,14 +156,14 @@ public class Company implements IAirCompany{
         boolean match=false;
 
         for(int i=0;i<this.ourEmployees.size()&&!match;i++){
-            if(this.ourEmployees.get(i)!=null){
-               if(this.ourEmployees.get(i)==e){
-                    this.ourEmployees.remove(i);//borro el empleado? recolector?
-                    match=true;
-                }
-            }else{
-                throw new Exception("No existe ese empleado");
+            if(this.ourEmployees.get(i)==e){
+                e.actualflight.removeEmployee(e);
+                this.ourEmployees.remove(i);
+                match=true;
             }
+        }
+        if(!match){
+            throw new Exception("Empleado no encontrado");
         }
     }
 
@@ -180,7 +186,7 @@ public class Company implements IAirCompany{
 
     /**Metodo que busca un empleado en concreto.
     *@param e: Recibe un objeto tipo Employee (empleado a buscar)
-    *@return boolean: true si se encuentra en el ArrayList<Employee> de esta clase, false sino se encuentra.
+    *@return boolean: true si se encuentra en el ArrayList de Employee de esta clase, false sino se encuentra.
     */
     public boolean searchEmployee(Employee e){
         boolean match=false;
@@ -193,7 +199,17 @@ public class Company implements IAirCompany{
         return match;
     }
 
-    /**Metodo que recorre el ArrayList<Client> de esta clase y suma el total
+    public void unsignEmployees(Flight f){
+        ArrayList<Employee>employees = f.flightsEmployee();
+
+        if(!employees.isEmpty()){
+            for(int i=0;i<employees.size();i++){
+                employees.get(i).actualflight=null;
+            }
+        }
+    }
+
+    /**Metodo que recorre el ArrayList de Client de esta clase y suma el total
     *de los atributos de Client, salary.
     *@return int total: Total del sueldo de todos los empleados.
     */
@@ -206,11 +222,11 @@ public class Company implements IAirCompany{
         return total;
     }
 
-    /**Metodo que inserta un Objeto tipo Plane en el ArrayList<Plane> de esta
-    *clase, si ese mismo bjeto, estaba en el ArrayList<Plane> de esta clase
+    /**Metodo que inserta un Objeto tipo Plane en el ArrayList de Plane de esta
+    *clase, si ese mismo bjeto, estaba en el ArrayList de Plane de esta clase
     *lanza excepcion.
-    *@throws:Dependiendo de que el objeto sea null o bien si el objeto se
-    *encuentra en el ArrayList<Plane> de esta clase, lanza una excepcion propia
+    *@throws Exception Dependiendo de que el objeto sea null o bien si el objeto se
+    *encuentra en el ArrayList de Plane de esta clase, lanza una excepcion propia
     *de cada posibilidad.
     */
     public void addPlane(Plane p)throws Exception{
@@ -225,7 +241,11 @@ public class Company implements IAirCompany{
         }
     }
 
-    public String listPlane(){
+    /**Metodo encargado de crear un String con el contenido del
+    ArrayList de Plane de esta clase, si no hay ninguno, lanza una excepcion
+    *@return String con la lista de aviones.
+    */
+    public String listPlane()throws Exception{
         StringBuilder listOfPlanes = new StringBuilder();
 
         if(!this.ourPlanes.isEmpty()){
@@ -233,24 +253,23 @@ public class Company implements IAirCompany{
                 listOfPlanes.append(this.ourPlanes.get(i)+"\n");
             }
         }else{
-            listOfPlanes.append("No hay aviones en el hangar");
+            throw new Exception("No hay aviones en el hangar");
         }
         return listOfPlanes.toString();
     }
 
-
+    /**Metodo encargado de eliminar el objeto tipo Plane pasado por referencia
+    *@param p Objeto tipo Plane a insertar.
+    */
     public void removePlane(Plane p)throws Exception{
         boolean match=false;
 
         if(p!=null){
             for(int i=0;i<this.ourPlanes.size()&&!match;i++){
-                if(this.ourPlanes.get(i)!=null){
-                   if(this.ourPlanes.get(i)==p){
-                        this.ourPlanes.remove(i);//borro el avion? recolector?
-                        match=true;
-                    }
-                }else{
-                    throw new Exception("No existe ese avion");
+                if(this.ourPlanes.get(i)==p){
+                    p.myFlight.myPlane=null;
+                    this.ourPlanes.remove(i);
+                    match=true;
                 }
             }
         }else{
@@ -258,7 +277,10 @@ public class Company implements IAirCompany{
         }
     }
 
-
+    /**Metodo el cual sirve para buscar un Objeto plane en especifico.
+    *@param p Objeto Plane a buscar.
+    *@return Un booleano el que devuelve true si encuentra el avion.
+    */
     public boolean searchPlane(Plane p)throws Exception{
         boolean match=false;
 
@@ -271,21 +293,28 @@ public class Company implements IAirCompany{
         }else{
             throw new Exception("Error: Intento de buscar objeto(Plane) nulo");
         }
-    return match;
+        return match;
     }
 
 
-    /**Metodo responsable de añadir un vuelo y de añadir los
-    *Billetes de dicho vuelo a el general de Billetes de la compañia.
-    @param f:Vuelo a añadir
+    /**Metodo responsable de añadir el vuelo pasado por referencia a el
+    *ArrayList de Ticket de esta clase, posteriormente llama a el metodo de esta
+    *clase, addFlightTickets.
+    @param f Vuelo a añadir
     */
     public void addFlight(Flight f){
-        this.ourFlights.add(f);
-        this.addFlightTickets(f);
+        if(f!=null){
+            this.ourFlights.add(f);
+            this.addFlightTickets(f);
+        }
     }
 
+    /**Metodo de apoyo para el metodo de esta clase addFlight. Este metodo
+    *recibe un vuelo, recorre los asientos del vuelo y por cada uno de ellos,
+    *instancia un objeto tipo Ticket.
+    *@param f Vuelo del cual se quieren crear sus Tickets
+    */
     public void addFlightTickets(Flight f){
-
         for(int i=0;i<f.seatsFlight.size();i++){
             for(int z=0;z<f.seatsFlight.get(i).size();z++){
                 this.ourTickets.add(new Ticket(f,f.seatsFlight.get(i).get(z)));
@@ -293,27 +322,29 @@ public class Company implements IAirCompany{
         }
     }
 
-
-
-
-    public String listFlight(){
+    /**Metodo destinado a recorrer el ArrayList de Flight de esta clase y añadir
+    *a un StringBuilder cada uno de los vuelos
+    *@return:Un String formateado con la lista de vuelos
+    */
+    public String listFlight()throws Exception{
         StringBuilder listOfFlights = new StringBuilder();
 
         if(!this.ourFlights.isEmpty()){
             for(int i=0;i<this.ourFlights.size();i++){
-                    listOfFlights.append(this.ourFlights.get(i)+"\n");
+                    listOfFlights.append(this.ourFlights.get(i).flightInformation()+"\n");
             }
         }else{
-            listOfFlights.append("No hay ningun vuelo disponible");
+            throw new Exception("No hay ningun vuelo disponible");
         }
         return listOfFlights.toString();
     }
 
-
-    /*No controlo horas
-
+    /**Metodo destinado a buscar un vuelo en el ArrayList de Flight de esta clase
+    *@param idFlight El id del vuelo por el que lo buscaremos.
+    *@return El vuelo si ha sido encontrado.
+    *@throws Exception Lanza una excepcion si el vuelo no ha sido encontrado
     */
-    /*public Flight searchFlight(String idFlight)throws Exception{
+    public Flight searchFlight(String idFlight)throws Exception{
         boolean match=false;
         Flight myFlight=null;
 
@@ -328,8 +359,17 @@ public class Company implements IAirCompany{
         }else{
             throw new Exception("Vuelo no encontrado");
         }
-    }*/
+    }
 
+    /**Metodo encargado de devolver un ArrayList de Flight de vuelos que coincidan
+    *con el nombre o siglas de los aeropuertos origen y destino.
+    *@param origin del nombre del aeropuerto origen.
+    *@param destination del nombre del aeropuerto destino.
+    *@return ArrayList de Flight con los vuelos encontrados.
+    *@throws Exception Si no hay vuelos en la compañia
+    *@throws Exception Si Destino y Origen son identicos
+    *@throws Exception Si no hay vuelos de ese Origen-Destino
+    */
     public ArrayList<Flight> searchFlights(String origin, String destination)throws Exception{
         ArrayList<Flight> tmp=new ArrayList<Flight>();
 
@@ -357,36 +397,55 @@ public class Company implements IAirCompany{
         return tmp;
     }
 
-    //si elimino avion que pasa con sus tickets en el arrayList?
+    /**Busca un vuelo en el ArrayList de Flight de esta clase, si lo encuentra
+    *lo elimina del ArrayList general y tambien desasigna a sus empleados.
+    *@param f Objeto tipo Fligh a eliminar
+    */
     public void removeFlight(Flight f)throws Exception{
         boolean match=false;
 
         for(int i=0;i<this.ourFlights.size()&&!match;i++){
-            if(this.ourFlights.get(i)!=null){
                if(this.ourFlights.get(i)==f){
-                    this.ourFlights.remove(i);//borro el avion? recolector?
+                   f.myPlane.myFlight=null;
+                    this.unsignEmployees(f);
+                    this.ourFlights.remove(i);
                     match=true;
                 }
-            }else{
-                throw new Exception("No existe ese avion");
-            }
+        }
+
+        if(!match){
+            throw new Exception("Vuelo no econtrado");
         }
     }
 
-    /*Ayade el ticket al cliente(con la condicion del dia)
-    *Lo retira de los disponibles en el vuelo
-    *Lo retira de los disponibles en el global
+    /**Metodo encargado de buscar en el ArrayList de Ticket un ticket en concreto
+    *eliminarlo del general de la compañia, buscar a un cliente por el dni e
+    *agregarle el Ticket buscado anteriormente y finalmente comprar el asiento
+    *del vuelo.
+    @param dni con el dni del cliente por el cual buscaremos al objeto
+    Cliente.
+    @param f con el vuelo en el que comparemos el asiento.
+    @param s Seat que sera el asiento que compraremos.
+    @return String con el id del Ticket.
     */
     public String buyTicket(String dni,Flight f, Seat s)throws Exception{
         Ticket theSameTicket=this.searchCompanyTicket(f,s);
-        this.removeCompanyTicket(theSameTicket);////////////////////////DIA?
+        this.removeCompanyTicket(theSameTicket);
         Client myClient=this.searchObjectClient(dni);
         myClient.addTicket(theSameTicket);
         f.buyTicket(s);
 
-        return theSameTicket.getId();//IMPOSIBLE YA QUE EL TICKET NO TIENE ID
+        return theSameTicket.getId();
     }
 
+    /**Metodo el cual busca un Ticket en especifico del ArrayList Ticket de
+    *esta clase por su vuelo y asiento.
+    *@param f Objeto tipo Flight, representa el Vuelo del ticket a buscar.
+    *@param s Objeto tipo Seat representa el asiento del ticket a encontrar.
+    @return Objeto Ticket.
+    @throws Exception si no hay ningun Ticket relacionado con un vuelo y asiento
+    *en especifico
+    */
     public Ticket searchCompanyTicket(Flight f, Seat s)throws Exception{
         Ticket myTicket=null;
         boolean match=false;
@@ -406,27 +465,31 @@ public class Company implements IAirCompany{
         }
     }
 
-    public void removeCompanyTicket(Ticket t)throws Exception{
+
+    /**Metodo el cual busca en el ArrayList de Ticket de esta clase y elimina
+    *un Ticket en concreto.
+    *@param t Objeto tipo Ticket a eliminar.
+    */
+    public void removeCompanyTicket(Ticket t){
         boolean deleted=false;
-        Calendar mc=Calendar.getInstance();
-        mc.set(myCalendar.simulatedDate.get(Calendar.YEAR),myCalendar.simulatedDate.get(Calendar.MONTH),(myCalendar.simulatedDate.get(Calendar.DAY_OF_MONTH)-1));
 
         for(int i=0;i<this.ourTickets.size()&&!deleted;i++){
             if(this.ourTickets.get(i)==t){
-                if(t.getDate().after(mc)){
                     this.ourTickets.remove(i);
                     deleted=true;
-                }else{
-                    throw new Exception("Es imposible devolver el ticket el mismo día del vuelo, lo sentimos.");
-                }
             }
         }
     }
 
-
-    /*Elimina el ticket del cliente(con la condicion del dia)
-    *Lo vuelve disponible en el vuelo
-    *Lo vuelve disponible en el global
+    /**En primer lugar, pasa el String a mayuscula de modo que independietemente
+    *de la letra (tanto si es mayuscula como miniscula lo aceptaria), por otro
+    *lado obtengo el Objeto Ticket por el id del mismo. Luego comparando la
+    *hora actual simulada y el dia de salida del billete, y si el dia de salida
+    *del billete es inferior a minimo un dia lo elimina sino lanzará una
+    *excepcion
+    *@param dni Dni del cliente para eliminarlo de su cuenta y para obtenerlo del
+    ArrayList de Ticket del general.
+    *@param ticketId identificador del ticket a buscar.
     */
     public void removeTicket(String dni, String ticketId)throws Exception{
         String myDni=dni.toUpperCase();
@@ -434,28 +497,32 @@ public class Company implements IAirCompany{
         Ticket theSameTicket=this.searchTicket(myDni,myTicketId);
         boolean user=false;
         boolean ticket=false;
+        GregorianCalendar mc=new GregorianCalendar(myCalendar.simulatedDate.get(Calendar.YEAR), myCalendar.simulatedDate.get(Calendar.MONTH),myCalendar.simulatedDate.get(Calendar.DAY_OF_MONTH)+1);
 
         for(int i=0;i<this.ourClients.size()&&!user;i++){
             if(this.ourClients.get(i).getDni().equals(dni)){
-                if(theSameTicket.myFlight.flightDate.get(Calendar.DATE)>myCalendar.simulatedDate.get(Calendar.DATE)){
-                    user=true;
-                    ticket=this.ourClients.get(i).removeTicket(ticketId);//si la fecha actual es superior a un dia de antelacion
+                user=true;
+                if(theSameTicket.myFlight.flightDate.after(mc)){
+                    ticket=this.ourClients.get(i).removeTicket(ticketId);
                     theSameTicket.myFlight.addSeat(theSameTicket.mySeat);
-                    this.ourTickets.add(theSameTicket);//Volver a ayadirlo al global*/ no se ayade en el mismo hueco, necesita metodo intermedio
-                }else{
-                    throw new Exception("Solo se aceptan devoluciones con mas de un dia de antelacion sobre la salida del vuelo, lo sentimos");
+                    this.ourTickets.add(theSameTicket);
                 }
             }
         }
 
             if(user==true&&ticket==false){
-                throw new Exception("No se encontro su ticket");
+                throw new Exception("No se pueden devolver Tickets el mismo dia del vuelo");
             }else if(user==false){
                 throw new Exception("Usuario desconocido");
             }
         }
 
-
+    /**Este metodo busca un Cliente por el dni y una vez encontrado busca en su
+    *ArrayList de Ticket, si se encuentra lo introduce en un Ticket tmp.
+    *@param dni Dni del cliente a buscar.
+    *@param ticketId id del ticket a buscar
+    @return Ticket Objeto Ticket a devolver
+    */
     public Ticket searchTicket(String dni, String ticketId)throws Exception{
         boolean user=false;
         Ticket myTicket=null;
@@ -479,13 +546,20 @@ public class Company implements IAirCompany{
     }
 
 
-
-    public void addClient(Client c)throws Exception{
+    /**Inserta un cliente, si no es nulo.
+    *@param c Cliente a insertar
+    */
+    public void addClient(Client c){
         if(c!=null){
                 this.ourClients.add(c);
         }
     }
 
+    /**Crea un String con cada elemento del ArrayList de Client de esta clase,
+    *si no hay ningun elemento devuelve un String con un mensaje que dice Lista
+    *de empleados vacia
+    *@return String con la lista de clientes(si hay)
+    */
     public String clientsList(){
         StringBuilder listOfClients = new StringBuilder();
 
@@ -499,6 +573,10 @@ public class Company implements IAirCompany{
         return listOfClients.toString();
     }
 
+    /**Busca en el ArrayList de Client de esta clase un cliente por el dni
+    *@param dni con el dni del cliente a buscar
+    *@return boolean true si se ha encontrado al cliente
+    */
     public boolean searchClient(String dni){
         boolean match=false;
 
@@ -510,7 +588,11 @@ public class Company implements IAirCompany{
         return match;
     }
 
-
+    /**Busca en el ArrayList de Client de esta clase un cliente con el dni pasado
+    *por parametro
+    *@param dni con el dni del cliente
+    *@return Objeto tipo Cliente o null dependiendo de si lo ha encontrado o no
+    */
     public Client searchObjectClient(String dni){
         boolean match=false;
         Client myClient=null;
@@ -524,35 +606,45 @@ public class Company implements IAirCompany{
         return myClient;
     }
 
-    public void removeClient(Client c)throws Exception{
+    /**Busca en el ArrayList de Client de esta clase un Objeto Cliente en concreto
+    *si lo encuentra lo elimina
+    *@param c Objeto tipo Client a buscar
+    */
+    public void removeClient(Client c){
         boolean match=false;
 
         for(int i=0;i<this.ourClients.size()&&!match;i++){
-            if(this.ourClients.get(i)!=null){
                if(this.ourClients.get(i)==c){
                     this.ourClients.remove(i);//borro el avion? recolector?
                     match=true;
                 }
-            }else{
-                throw new Exception("No existe ese avion");
-            }
         }
     }
 
+    /**Devuelve el ArrayList de Seat de la clase Flight de un vuelo en concreto.
+    *@param f Objeto tipo Flight que representa un vuelo en concreto
+    *@return ArrayList de Seat con los asientos disponibles del vuelo
+    *@throws Exception si el metodo getFreeSeats de Flight lanza una excepcion
+    */
     public ArrayList<Seat> getFreeSeatFromFlight(Flight f)throws Exception{
         return f.getFreeSeats();
     }
 
+    /**Metodo el cual busca un vuelo en el ArrayList de Flight de esta clase
+    *y si lo encuentra, llama a su metodo myProfitability()
+    *@param flightId con el id del vuelo en cuestion
+    *@return String con la probabilidad del vuelo
+    *@throws Exception Si no hay vuelos disponibles
+    */
     public String flightsProfitablity(String flightId)throws Exception{
         String profitability=null;
+        boolean match=false;
 
         if(this.ourFlights.isEmpty()==false){
-            System.out.println("hola");
-            for(int i=0;i<this.ourFlights.size();i++){
-                System.out.println("hola");
+            for(int i=0;i<this.ourFlights.size()&&!match;i++){
                 if(this.ourFlights.get(i).id.equals(flightId)){
-                    System.out.println("hola");
                     profitability=this.ourFlights.get(i).myProfitability();
+                    match=true;
                 }
             }
         }else{
@@ -564,15 +656,9 @@ public class Company implements IAirCompany{
 
 
 
-
-
     @Override
     public String toString(){
         return "String compania"+this.ourCeo;
     }
 
-    /*@Override
-    public int compareTo(Calendar anotherCalendar){
-        return this.Calendar - anotherCalendar;
-    }*/
 }
