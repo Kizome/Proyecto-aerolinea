@@ -6,7 +6,7 @@ import java.util.Calendar;
 *@author Jesus Torralbo
 */
 
-abstract public class People{
+public class People{
     //Atributos
     protected String name;
 	protected String surname;

@@ -9,21 +9,21 @@ import java.util.Calendar;
 /**@author Omar Jesus Muñoz
 */
 
-abstract public class Employee extends People{
-    
+public class Employee extends People{
+
     public static int N_EMPLOYER;
-    
+
     protected int salary;
     private int employeenumber;
     private ArrayList<String> languages;
     protected int numberOfFlight;
     public Flight actualflight;
-    
-    
+
+
     static{
         N_EMPLOYER=0;
     }
-    
+
     protected Employee(String name, String surname, String dni,Calendar b,String nationality, String language, int nflights,int salary)throws Exception{
         super(name, surname, dni, b, nationality);
         this.employeenumber=this.N_EMPLOYER++;
