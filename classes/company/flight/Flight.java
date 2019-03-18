@@ -111,6 +111,8 @@ public class Flight{
         this.generateTripulation(pla);
         generateArrive(cal);
         p.actualflight=this;
+        p.addHours(dura);
+        p.salarysIncrement();
     }
 
     public Flight(Airport dest, Airport ori, Plane pla,

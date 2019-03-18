@@ -98,8 +98,7 @@ public class Main{
             System.out.println(e.getMessage());
         }
         
-        Menu mainMenu=Menu.getInstance();
-        mainMenu.showMenu();
+        Menu.showMenu();
 
         
     }

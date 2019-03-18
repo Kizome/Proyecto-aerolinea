@@ -26,7 +26,6 @@ public class Menu{
     
     private static Scanner console;
     private static Company myCompany;
-    private static Menu me;
 
     static{
         myCompany=Company.getInstance();
@@ -35,13 +34,6 @@ public class Menu{
     
     private Menu(){
         
-    }
-    
-    public static Menu getInstance(){
-        if(me==null){
-            me=new Menu();
-        }
-        return me;
     }
     
     /**Metodo que representa el menu con el que interactuara el usuario
